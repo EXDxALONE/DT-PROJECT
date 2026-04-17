@@ -1,17 +1,15 @@
-import { Link, useParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Play, Pause, ChevronLeft, Lightbulb, UserCheck, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Results() {
-  const { id } = useParams();
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(30); // 30% representing 0:45 of 2:30
   
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isPlaying) {
       interval = setInterval(() => {
         setProgress(prev => {
