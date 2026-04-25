@@ -78,7 +78,13 @@ export default function Upload() {
         if (prev >= 100) {
           clearInterval(interval);
           setTimeout(() => {
-            navigate('/results/mock-id-123');
+            localStorage.setItem('lastUploadedFile', JSON.stringify({
+              name: file.name,
+              size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+              date: new Date().toLocaleDateString()
+            }));
+            // navigate('/results/mock-id-123');
+            navigate('/results/' + encodeURIComponent(file.name));
           }, 1000);
           return 100;
         }
@@ -90,9 +96,10 @@ export default function Upload() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Simple Header */}
-      <header className="border-b border-border/40 px-6 py-4 flex justify-between items-center">
-        <Link to="/" className="font-display font-bold text-lg tracking-tight hover:opacity-80">
-          Oratix <span className="text-primary text-gradient">AI</span>
+      <header className="border-b border-border/40 px-6 py-4 flex justify-between items-center bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80">
+          <img src="/logo.png" alt="Oratix Logo" className="w-8 h-8 rounded-md" />
+          <span className="font-display font-bold text-lg tracking-tight">Oratix <span className="text-primary text-gradient">AI</span></span>
         </Link>
         <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-primary">
           Dashboard

@@ -11,9 +11,7 @@ export default function Signup() {
       <div className="w-full max-w-sm">
         <div className="flex flex-col items-center mb-8">
           <Link to="/" className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <Mic className="w-4 h-4 text-primary-foreground" />
-            </div>
+            <img src="/logo.png" alt="Oratix Logo" className="w-8 h-8 rounded-md object-contain" />
             <span className="font-display font-bold text-xl tracking-tight">Oratix <span className="text-primary text-gradient">AI</span></span>
           </Link>
         </div>

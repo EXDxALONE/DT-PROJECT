@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Pause, ChevronLeft, Lightbulb, UserCheck, TrendingUp, AlertTriangle } from 'lucide-react';
@@ -28,20 +28,72 @@ export default function Results() {
   const currentSeconds = Math.floor((progress / 100) * 150);
   const formattedTime = `${Math.floor(currentSeconds / 60)}:${(currentSeconds % 60).toString().padStart(2, '0')}`;
   
-  // Simulated data based on prompt requirements
-  const overallGrade = 7.8; // Grade out of 10
-  
-  const metrics = [
-    { name: 'Clarity Index™', score: 85, color: 'bg-blue-500' },
-    { name: 'Confidence Meter™', score: 72, color: 'bg-purple-500' },
-    { name: 'Fluency Score™', score: 90, color: 'bg-emerald-500' },
-  ];
+  const { id } = useParams<{ id: string }>();
 
-  const fillerWords = [
-    { word: 'like', count: 14 },
-    { word: 'um', count: 8 },
-    { word: 'basically', count: 5 }
-  ];
+  // Generate random dynamic data on component mount to simulate real analysis per video
+  const [{ overallGrade, metrics, fillerWords, suggestions, comparisons }] = useState(() => {
+    // Seeded Random Generator based on URL string ID
+    const seedString = id || "default-video";
+    let hash = 0;
+    for (let i = 0; i < seedString.length; i++) {
+        hash = Math.imul(31, hash) + seedString.charCodeAt(i) | 0;
+    }
+    let seed = hash;
+    const random = () => {
+      let t = seed += 0x6D2B79F5;
+      t = Math.imul(t ^ t >>> 15, t | 1);
+      t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+
+    const grade = (random() * 3 + 6.5).toFixed(1);
+    
+    const possibleFillers = ['like', 'um', 'basically', 'actually', 'you know', 'right', 'so', 'I mean', 'uh'];
+    const shuffledFillers = possibleFillers.sort(() => 0.5 - random());
+    const selectedFillers = shuffledFillers.slice(0, 3 + Math.floor(random() * 2));
+    const randomFillers = selectedFillers.map(word => ({
+      word,
+      count: Math.floor(random() * 15) + 3
+    })).sort((a, b) => b.count - a.count);
+
+    const metricsData = [
+      { name: 'Clarity Index™', score: Math.floor(random() * 20 + 80), color: 'bg-blue-500' },
+      { name: 'Confidence Meter™', score: Math.floor(random() * 25 + 70), color: 'bg-purple-500' },
+      { name: 'Fluency Score™', score: Math.floor(random() * 15 + 85), color: 'bg-emerald-500' },
+    ];
+
+    const possiblePacingSuggestions = [
+      { title: "Pacing and Pauses", text: "You tend to speak faster when transitioning between main points. Try pausing for a full 2 seconds after completing a major thought. This gives the audience time to absorb the information and boosts your perceived confidence." },
+      { title: "Rhythm and Flow", text: "Your speaking speed is a bit inconsistent. Try to maintain a steady tempo throughout your presentation. Slowing down slightly during key takeaways will help emphasize their importance." },
+      { title: "Breathing Room", text: "You rush through complex topics. Remember to let your sentences breathe. Incorporating deliberate, short pauses not only helps you gather your thoughts but also keeps the listener engaged." }
+    ];
+    
+    const possibleFillerSuggestions = [
+      { title: "Filler Word Reduction", text: `You used the word "${randomFillers[0]?.word || "like"}" ${randomFillers[0]?.count || 10} times. This usually happens when searching for the next word. When you feel a filler word coming, intentionally close your mouth and take a breath instead.` },
+      { title: "Eliminating Crutch Words", text: `The word "${randomFillers[0]?.word || "um"}" appeared ${randomFillers[0]?.count || 8} times, which can distract from your core message. Practice silence as an alternative to filling the void, it makes you sound much more thoughtful.` },
+      { title: "Mindful Transitions", text: `You rely on "${randomFillers[0]?.word || "basically"}" during transitions. Try replacing it with a confident transitional phrase or simply embracing a moment of silence to reset your train of thought.` }
+    ];
+
+    const possibleComparisons = [
+      { init: "SJ", name: "Steve Jobs (Historical Comparison)", text: "Your clarity is excellent, much like Jobs' product presentations. However, Jobs utilized silence masterfully. Watch his 2007 iPhone keynote to see how he uses 3-5 second pauses to build anticipation." },
+      { init: "MB", name: "Marques Brownlee (MKBHD)", text: "Your current pacing and tone closely match Marques Brownlee's tech reviews. Notice how he emphasizes key specs with a slight drop in pitch. Practice this technique to sound more authoritative on core subjects." },
+      { init: "MO", name: "Michelle Obama", text: "Your measured, articulate style echoes Michelle Obama's inspiring speeches. To improve further, focus on varying your vocal inflection during emotional points, matching her ability to connect personally with the audience." },
+      { init: "BB", name: "Brené Brown", text: "You show a vulnerability and authenticity similar to Brené Brown's famous TED talks. Cultivate your storytelling by leaning into your personal anecdotes, while managing your pace to maximize the impact of your punchlines." }
+    ];
+
+    const selectedComparisons = possibleComparisons.sort(() => 0.5 - random()).slice(0, 2);
+
+    return {
+      overallGrade: grade,
+      metrics: metricsData,
+      fillerWords: randomFillers,
+      suggestions: [
+        possiblePacingSuggestions[Math.floor(random() * possiblePacingSuggestions.length)],
+        possibleFillerSuggestions[Math.floor(random() * possibleFillerSuggestions.length)]
+      ],
+      comparisons: selectedComparisons
+    };
+  });
 
   return (
     <div className="min-h-screen bg-background text-foreground pb-24">
@@ -161,14 +213,12 @@ export default function Results() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="p-4 bg-background border border-border rounded-xl">
-                  <h4 className="font-semibold mb-1">Pacing and Pauses</h4>
-                  <p className="text-sm text-muted-foreground">You tend to speak faster when transitioning between main points. Try pausing for a full 2 seconds after completing a major thought. This gives the audience time to absorb the information and boosts your perceived confidence.</p>
-                </div>
-                <div className="p-4 bg-background border border-border rounded-xl">
-                  <h4 className="font-semibold mb-1">Filler Word Reduction</h4>
-                  <p className="text-sm text-muted-foreground">You used the word "like" 14 times. This usually happens when searching for the next word. When you feel a filler word coming, intentionally close your mouth and take a breath instead.</p>
-                </div>
+                {suggestions.map((sug, idx) => (
+                  <div key={idx} className="p-4 bg-background border border-border rounded-xl">
+                    <h4 className="font-semibold mb-1">{sug.title}</h4>
+                    <p className="text-sm text-muted-foreground">{sug.text}</p>
+                  </div>
+                ))}
               </CardContent>
             </Card>
 
@@ -181,25 +231,17 @@ export default function Results() {
                 <CardDescription>Learn from those with similar communication styles</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex gap-4 items-start pb-4 border-b border-border/50">
-                  <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center shrink-0 border border-border text-lg font-bold">
-                    SJ
+                {comparisons.map((comp, idx) => (
+                  <div key={idx} className={`flex gap-4 items-start ${idx === 0 ? 'pb-4 border-b border-border/50' : 'pt-2'}`}>
+                    <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center shrink-0 border border-border text-lg font-bold">
+                      {comp.init}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold">{comp.name}</h4>
+                      <p className="text-sm text-muted-foreground mt-1">{comp.text}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold">Steve Jobs (Historical Comparison)</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Your clarity is excellent, much like Jobs' product presentations. However, Jobs utilized silence masterfully. Watch his 2007 iPhone keynote to see how he uses 3-5 second pauses to build anticipation.</p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-4 items-start pt-2">
-                  <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center shrink-0 border border-border text-lg font-bold">
-                    MB
-                  </div>
-                  <div>
-                    <h4 className="font-semibold">Marques Brownlee (MKBHD)</h4>
-                    <p className="text-sm text-muted-foreground mt-1">Your current pacing and tone closely match Marques Brownlee's tech reviews. Notice how he emphasizes key specs with a slight drop in pitch. Practice this technique to sound more authoritative on core subjects.</p>
-                  </div>
-                </div>
+                ))}
               </CardContent>
             </Card>
           </div>
